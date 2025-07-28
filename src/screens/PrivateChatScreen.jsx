@@ -140,29 +140,37 @@ const passedName = location.state?.name || null;
 
 
   const fetchMessages = async (fromUser, toUser) => {
-    try {
-      const res = await fetch(`${BASE_URL}/messages`);
-      const data = await res.json();
-      const filtered = (Array.isArray(data) ? data : []).filter(
-        conv =>
-          (conv.sender === fromUser && conv.receiver === toUser) ||
-          (conv.sender === toUser && conv.receiver === fromUser)
-      );
+  try {
+    const res = await fetch(`${BASE_URL}/messages`);
+    const data = await res.json();
 
-      const allMessages = [];
-      filtered.forEach(conv => {
-        (conv.conversation || []).forEach(msg => {
+    const filtered = (Array.isArray(data) ? data : []).filter(
+      conv =>
+        (conv.sender === fromUser && conv.receiver === toUser) ||
+        (conv.sender === toUser && conv.receiver === fromUser)
+    );
+
+    const fifteenDaysAgo = new Date();
+    fifteenDaysAgo.setDate(fifteenDaysAgo.getDate() - 15);
+
+    const allMessages = [];
+    filtered.forEach(conv => {
+      (conv.conversation || []).forEach(msg => {
+        const msgDate = new Date(msg.timestamp);
+        if (msgDate >= fifteenDaysAgo) {
           const decrypted = msg.text ? decryptMessage(msg.text) : '';
           allMessages.push({ ...msg, to: toUser, text: decrypted });
-        });
+        }
       });
+    });
 
-      setMessages(allMessages);
-      scrollToBottom();
-    } catch (err) {
-      console.error(err);
-    }
-  };
+    setMessages(allMessages);
+    scrollToBottom();
+  } catch (err) {
+    console.error(err);
+  }
+};
+
 
   const fetchContactName = async (owner, contact) => {
     try {
@@ -233,22 +241,6 @@ const passedName = location.state?.name || null;
     setAttachment(null);
   };
 
-  const handleDeleteChat = async () => {
-    try {
-      const res = await fetch(`${BASE_URL}/delete-conversation`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ user1: currentUser, user2: to }),
-      });
-      const result = await res.json();
-      if (res.ok && result.success) {
-        setMessages([]);
-        setAnchorEl(null);
-      }
-    } catch (err) {
-      console.error(err);
-    }
-  };
 
   const groupMessagesByDate = (msgs) => {
     const grouped = {};
@@ -272,7 +264,6 @@ const passedName = location.state?.name || null;
         <div>
           <IconButton onClick={handleMenuOpen}><MoreVertIcon /></IconButton>
           <Menu anchorEl={anchorEl} open={open} onClose={handleMenuClose}>
-            <MenuItem onClick={handleDeleteChat}>Delete Chat</MenuItem>
             <MenuItem onClick={() => setViewDialogOpen(true)}>View Contact</MenuItem>
             <MenuItem onClick={() => alert('Blocked')}>Block User</MenuItem>
             <MenuItem onClick={() => setMessages([])}>Clear Chat</MenuItem>

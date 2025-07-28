@@ -137,19 +137,33 @@ useEffect(() => {
     return `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')} ${time}`;
   };
 
-  const fetchMessages = async () => {
-    try {
-      const res = await fetch(`${BASE_URL}/group-messages/${group.id}`);
-      const data = await res.json();
-      if (!Array.isArray(data)) return;
-      console.log('Fetched messages:', data);
-      const decryptedMsgs = data.map(msg => ({ ...msg, text: msg.text ? decryptMessage(msg.text) : '' }));
-      setMessages(decryptedMsgs);
-      scrollToBottom();
-    } catch (err) {
-      console.error('Error in fetchMessages:', err);
-    }
-  };
+ const fetchMessages = async () => {
+  try {
+    const res = await fetch(`${BASE_URL}/group-messages/${group.id}`);
+    const data = await res.json();
+    if (!Array.isArray(data)) return;
+
+    const fifteenDaysAgo = new Date();
+    fifteenDaysAgo.setDate(fifteenDaysAgo.getDate() - 15);
+
+    const recentMessages = data.filter(msg => {
+      if (!msg.timestamp) return false;
+      const msgDate = new Date(msg.timestamp);
+      return !isNaN(msgDate) && msgDate >= fifteenDaysAgo;
+    });
+
+    const decryptedMsgs = recentMessages.map(msg => ({
+      ...msg,
+      text: msg.text ? decryptMessage(msg.text) : '',
+    }));
+
+    setMessages(decryptedMsgs);
+    scrollToBottom();
+  } catch (err) {
+    console.error('Error in fetchMessages:', err);
+  }
+};
+
 
 const fetchMembers = async () => {
   try {
