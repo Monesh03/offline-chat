@@ -3,12 +3,11 @@ import React, { useEffect, useState, useRef } from 'react';
 import {
   Box, Typography, IconButton, TextField, Dialog, DialogTitle,
   DialogContent, DialogContentText, Menu, MenuItem, DialogActions,
-  Button, InputLabel, Select, FormControl
+  Button, InputLabel, Select, FormControl, Avatar, Paper
 } from '@mui/material';
-import AttachFileIcon from '@mui/icons-material/AttachFile';
-import SendIcon from '@mui/icons-material/Send';
-import MoreVertIcon from '@mui/icons-material/MoreVert';
-import CloseIcon from '@mui/icons-material/Close';
+import {
+  AttachFile, Send, MoreVert, Close, ArrowBack, Group as GroupIcon
+} from '@mui/icons-material';
 import { useLocation } from 'react-router-dom';
 import { io } from 'socket.io-client';
 import CryptoJS from 'crypto-js';
@@ -320,11 +319,32 @@ const sendMessage = async () => {
   }
 
   return (
-   <Box sx={{ height: '100vh', display: 'flex', flexDirection: 'column', background: '#e5ddd5' }}>
-  <Box sx={{ display: 'flex', justifyContent: 'space-between', p: 2, bgcolor: '#fff' }}>
-    <Typography variant="h6" sx={{ color: '#075e54' }}>{group.name}</Typography>
+   <Box sx={{ height: '100vh', display: 'flex', flexDirection: 'column', backgroundColor: '#0b141a' }}>
+  <Box sx={{
+    display: 'flex',
+    alignItems: 'center',
+    p: 2,
+    backgroundColor: '#1f2937',
+    borderBottom: '1px solid #374151',
+  }}>
+    <IconButton sx={{ color: '#e5e7eb', mr: 1 }}>
+      <ArrowBack />
+    </IconButton>
+    <Avatar sx={{ bgcolor: '#0ea5e9', mr: 2, width: 40, height: 40 }}>
+      <GroupIcon />
+    </Avatar>
+    <Box sx={{ flex: 1 }}>
+      <Typography variant="h6" sx={{ color: '#e5e7eb', fontWeight: 500 }}>
+        {group.name}
+      </Typography>
+      <Typography variant="caption" sx={{ color: '#9ca3af' }}>
+        {members.filter(Boolean).length} members
+      </Typography>
+    </Box>
     <div>
-      <IconButton onClick={(e) => setAnchorEl(e.currentTarget)}><MoreVertIcon /></IconButton>
+      <IconButton onClick={(e) => setAnchorEl(e.currentTarget)} sx={{ color: '#e5e7eb' }}>
+        <MoreVert />
+      </IconButton>
       <Menu anchorEl={anchorEl} open={Boolean(anchorEl)} onClose={() => setAnchorEl(null)}>
         <MenuItem onClick={() => setViewDialogOpen(true)}>View Members</MenuItem>
         {isAdmin && <MenuItem onClick={() => setAddDialogOpen(true)}>Add Member</MenuItem>}
@@ -333,7 +353,13 @@ const sendMessage = async () => {
   </Box>
 
   {/* ✅ View Members Dialog */}
-  <Dialog open={viewDialogOpen} onClose={() => setViewDialogOpen(false)}>
+  <Dialog
+    open={viewDialogOpen}
+    onClose={() => setViewDialogOpen(false)}
+    PaperProps={{
+      sx: { backgroundColor: '#1f2937', color: '#e5e7eb' }
+    }}
+  >
     <DialogTitle>Group Info</DialogTitle>
     <DialogContent>
       <DialogContentText>
@@ -351,7 +377,13 @@ const sendMessage = async () => {
   </Dialog>
 
   {/* ✅ Add Member Dialog */}
-  <Dialog open={addDialogOpen} onClose={() => setAddDialogOpen(false)}>
+  <Dialog
+    open={addDialogOpen}
+    onClose={() => setAddDialogOpen(false)}
+    PaperProps={{
+      sx: { backgroundColor: '#1f2937', color: '#e5e7eb' }
+    }}
+  >
     <DialogTitle>Add Member</DialogTitle>
     <DialogContent>
       <FormControl fullWidth sx={{ mt: 2 }}>
@@ -379,10 +411,19 @@ const sendMessage = async () => {
   </Dialog>
 
 
-      <Box sx={{ flex: 1, overflowY: 'auto', p: 2 }}>
+      <Box sx={{ flex: 1, overflowY: 'auto', p: 2, backgroundColor: '#111b21' }}>
         {Object.entries(groupByDate(messages)).map(([date, msgs]) => (
           <React.Fragment key={date}>
-            <Typography sx={{ textAlign: 'center', fontSize: 12, color: '#64748b', my: 1 }}>{date}</Typography>
+            <Box sx={{ display: 'flex', justifyContent: 'center', my: 2 }}>
+              <Paper sx={{
+                backgroundColor: '#1f2937',
+                px: 2,
+                py: 0.5,
+                borderRadius: 2,
+              }}>
+                <Typography sx={{ fontSize: 12, color: '#9ca3af' }}>{date}</Typography>
+              </Paper>
+            </Box>
            {msgs.map((msg, i) => {
           const sender = msg.sender || msg.from;
           const isMe = sender === currentUser;
@@ -391,49 +432,70 @@ const sendMessage = async () => {
 
 
   return (
-    <Box key={i} sx={{
-      display: 'flex',
-      flexDirection: 'column',
-      alignItems: isMe ? 'flex-end' : 'flex-start',
-      mb: 1
-    }}>
-      {/* ✅ Always show sender identifier or name above message */}
-      <Typography sx={{ fontSize: 12, color: '#075e54', fontWeight: 'bold', mb: 0.3 }}>
-        {senderName}
-      </Typography>
-
+    <Box key={i} sx={{ mb: 2 }}>
       <Box sx={{
-        bgcolor: isMe ? '#dcf8c6' : '#fff',
-        borderRadius: 2,
-        p: 1.5,
-        maxWidth: '70%',
-        boxShadow: 1,
-        wordBreak: 'break-word'
+        display: 'flex',
+        justifyContent: isMe ? 'flex-end' : 'flex-start',
+        alignItems: 'flex-end',
       }}>
-        {msg.text && <Typography>{msg.text}</Typography>}
-        {msg.attachment_url && (
-          msg.attachment_url.match(/\.(jpg|jpeg|png|gif)$/i)
-            ? <img src={msg.attachment_url} alt="file" style={{ maxWidth: '100%', marginTop: 6, borderRadius: 8 }} />
-            : <a href={msg.attachment_url} target="_blank" rel="noreferrer">📎 View File</a>
+        {!isMe && (
+          <Avatar sx={{ bgcolor: '#25d366', mr: 1, width: 32, height: 32 }}>
+            {senderName.charAt(0).toUpperCase()}
+          </Avatar>
         )}
-        <Typography sx={{ fontSize: 10, color: '#64748b', mt: 1, textAlign: 'right' }}>
-          {time}
-        </Typography>
+        <Box sx={{
+          maxWidth: '70%',
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: isMe ? 'flex-end' : 'flex-start',
+        }}>
+          {!isMe && (
+            <Typography sx={{ fontSize: 12, color: '#25d366', fontWeight: 'bold', mb: 0.3, ml: 1 }}>
+              {senderName}
+            </Typography>
+          )}
+          <Box sx={{
+            backgroundColor: isMe ? '#005c4b' : '#1f2937',
+            borderRadius: '18px',
+            p: 1.5,
+            wordBreak: 'break-word',
+          }}>
+            {msg.text && (
+              <Typography sx={{ color: '#e5e7eb', mb: 0.5 }}>
+                {msg.text}
+              </Typography>
+            )}
+            {msg.attachment_url && (
+              msg.attachment_url.match(/\.(jpg|jpeg|png|gif)$/i)
+                ? <img src={msg.attachment_url} alt="file" style={{ maxWidth: '100%', marginTop: 6, borderRadius: 8 }} />
+                : <a href={msg.attachment_url} target="_blank" rel="noreferrer" style={{ color: '#25d366' }}>📎 View File</a>
+            )}
+            <Typography sx={{
+              fontSize: 11,
+              color: '#9ca3af',
+              mt: 0.5,
+              textAlign: 'right',
+            }}>
+              {time}
+            </Typography>
+          </Box>
+        </Box>
       </Box>
     </Box>
-              );
-            })}
+  );
+})}
+
             <div ref={scrollRef} />
           </React.Fragment>
         ))}
       </Box>
       {attachment && (
-              <Box sx={{ bgcolor: '#fff', p: 2, position: 'relative', borderTop: '1px solid #ccc' }}>
+              <Box sx={{ backgroundColor: '#1f2937', p: 2, position: 'relative', borderTop: '1px solid #374151' }}>
                 <IconButton
                   sx={{ position: 'absolute', top: 4, right: 4 }}
                   onClick={() => setAttachment(null)}
                 >
-                  <CloseIcon sx={{ color: '#dc2626' }} />
+                  <Close sx={{ color: '#ef4444' }} />
                 </IconButton>
                 {attachment.type?.startsWith('image') ? (
                   <img
@@ -442,25 +504,44 @@ const sendMessage = async () => {
                     style={{ width: 120, height: 120, borderRadius: 12 }}
                   />
                 ) : (
-                  <Typography sx={{ mt: 1 }}>📎 {attachment.name}</Typography>
+                  <Typography sx={{ mt: 1, color: '#e5e7eb' }}>📎 {attachment.name}</Typography>
                 )}
               </Box>
             )}
-      <Box sx={{ display: 'flex', alignItems: 'center', p: 1, bgcolor: '#f0f0f0', borderTop: '1px solid #ccc' }}>
-        <IconButton component="label">
-          <AttachFileIcon />
+      <Box sx={{
+        display: 'flex',
+        alignItems: 'center',
+        p: 2,
+        backgroundColor: '#1f2937',
+        borderTop: '1px solid #374151',
+      }}>
+        <IconButton component="label" sx={{ color: '#9ca3af' }}>
+          <AttachFile />
           <input type="file" hidden onChange={pickAttachment} />
         </IconButton>
         <TextField
           value={message}
           onChange={(e) => setMessage(e.target.value)}
-          placeholder="Message"
+          placeholder="Type a message"
           variant="outlined"
-          fullWidth size="small"
-          sx={{ mx: 1, bgcolor: '#fff', borderRadius: 2 }}
+          fullWidth
+          size="small"
+          sx={{
+            mx: 1,
+            '& .MuiOutlinedInput-root': {
+              backgroundColor: '#374151',
+              color: '#e5e7eb',
+              borderRadius: '20px',
+              '& fieldset': { border: 'none' },
+            },
+            '& .MuiInputBase-input::placeholder': {
+              color: '#9ca3af',
+              opacity: 1,
+            },
+          }}
         />
-        <IconButton onClick={sendMessage}>
-          <SendIcon sx={{ color: '#075e54' }} />
+        <IconButton onClick={sendMessage} sx={{ color: '#25d366' }}>
+          <Send />
         </IconButton>
       </Box>
     </Box>

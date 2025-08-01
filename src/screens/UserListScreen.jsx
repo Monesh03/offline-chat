@@ -1,8 +1,9 @@
 // src/screens/UserListScreen.jsx
 import React, { useEffect, useState } from 'react';
 import {
-  Box, TextField, Typography, Button, Snackbar, Paper
+  Box, TextField, Typography, Button, Snackbar, Paper, Avatar, Divider, IconButton
 } from '@mui/material';
+import { Add, Search, Group, Person } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
 import { io } from 'socket.io-client';
 
@@ -241,190 +242,318 @@ const UserListScreen = () => {
  return (
   <Box
     sx={{
-      px: { xs: 2, sm: 4 },
-      py: 3,
-      maxWidth:1600,
-      mx: 'auto',
-      bgcolor: '#ece5dd',
       minHeight: '100vh',
-      borderRadius: 2,
-      boxShadow: 5,
-    }}
-    >
-  <Box
-    sx={{
-      px: { xs: 2, sm: 4 },
-      py: 3,
-      maxWidth:1200,
-      mx: 'auto',
-      bgcolor: '#ece5dd',
-      minHeight: '100vh',
+      backgroundColor: '#0b141a',
+      display: 'flex',
+      flexDirection: 'column',
     }}
   >
-    <Typography variant="h5" fontWeight="bold" color="primary" gutterBottom>
-      Add New Contact
-    </Typography>
-
-    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, mb: 3 }}>
-      <TextField
-        label="Name"
-        value={contactName}
-        onChange={(e) => setContactName(e.target.value)}
-        size="small"
-        sx={{ bgcolor: '#fff', borderRadius: 1 }}
-      />
-      <Box sx={{ display: 'flex', gap: 1 }}>
-        <TextField
-          label="Email or Phone"
-          value={emailInput}
-          onChange={(e) => setEmailInput(e.target.value)}
-          fullWidth
-          size="small"
-          sx={{ bgcolor: '#fff', borderRadius: 1 }}
-        />
-        <Button
-          variant="contained"
-          onClick={() => handleAddContact()}
-          sx={{ bgcolor: '#25D366', '&:hover': { bgcolor: '#1EBE5D' }, px: 3 }}
-        >
-          Add
-        </Button>
+    {/* Header */}
+    <Box sx={{
+      backgroundColor: '#1f2937',
+      p: 2,
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      borderBottom: '1px solid #374151',
+    }}>
+      <Typography variant="h5" sx={{ color: '#e5e7eb', fontWeight: 500 }}>
+        WhatsApp
+      </Typography>
+      <Box>
+        <IconButton sx={{ color: '#9ca3af' }}>
+          <Search />
+        </IconButton>
       </Box>
     </Box>
 
-    {/* Contacts Section */}
-    <Typography variant="h6" fontWeight="bold" mb={1}>
-      My Contacts
-    </Typography>
-    <TextField
-      label="Search Contacts"
-      value={searchText}
-      onChange={(e) => handleSearch(e.target.value)}
-      fullWidth
-      size="small"
-      sx={{ mb: 1.5, bgcolor: '#fff', borderRadius: 1 }}
-    />
-
-    <Box sx={{ maxHeight: 180, overflowY: 'auto', mb: 3 }}>
-      {filteredContacts.map((item) => (
-        <Paper
-          key={item.contact}
-          elevation={1}
+    <Box sx={{ flex: 1, overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
+      {/* Add Contact Section */}
+      <Box sx={{ backgroundColor: '#1f2937', p: 3, borderBottom: '1px solid #374151' }}>
+        <Typography variant="h6" sx={{ color: '#e5e7eb', mb: 2, display: 'flex', alignItems: 'center' }}>
+          <Add sx={{ mr: 1, color: '#25d366' }} />
+          Add New Contact
+        </Typography>
+        
+        <TextField
+          label="Name"
+          value={contactName}
+          onChange={(e) => setContactName(e.target.value)}
+          fullWidth
+          size="small"
           sx={{
-            display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'center',
-            p: 1.5,
-            mb: 1,
-            borderRadius: 2,
-            bgcolor: '#fff',
+            mb: 2,
+            '& .MuiOutlinedInput-root': {
+              backgroundColor: '#374151',
+              color: '#e5e7eb',
+              '& fieldset': { borderColor: '#4b5563' },
+              '&:hover fieldset': { borderColor: '#25d366' },
+              '&.Mui-focused fieldset': { borderColor: '#25d366' },
+            },
+            '& .MuiInputLabel-root': { color: '#9ca3af' },
+            '& .MuiInputLabel-root.Mui-focused': { color: '#25d366' },
           }}
-        >
-          <Box onClick={() => navigateToChat(item)} sx={{ cursor: 'pointer' }}>
-            <Typography>{item.name || item.contact}</Typography>
-          </Box>
-          <Typography sx={{ color: onlineUsers.includes(item.contact) ? 'green' : 'gray' }}>
-            {onlineUsers.includes(item.contact) ? 'Online' : 'Offline'}
-          </Typography>
-          <Button
-            onClick={() => handleDeleteContact(item.contact)}
-            color="error"
+        />
+        <Box sx={{ display: 'flex', gap: 1 }}>
+          <TextField
+            label="Email or Phone"
+            value={emailInput}
+            onChange={(e) => setEmailInput(e.target.value)}
+            fullWidth
             size="small"
-            sx={{ fontWeight: 'bold' }}
-          >
-            Remove
-          </Button>
-        </Paper>
-      ))}
-    </Box>
-
-    {/* Unknown Users */}
-    <Typography variant="h6" fontWeight="bold" mb={1}>
-      Messages from Unknown Users
-    </Typography>
-    <Box sx={{ maxHeight: 160, overflowY: 'auto', mb: 3 }}>
-      {unknownSenders.map((item) => (
-        <Paper
-          key={item}
-          elevation={1}
-          sx={{
-            display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'center',
-            p: 1.5,
-            mb: 1,
-            borderRadius: 2,
-            bgcolor: '#fff',
-          }}
-        >
-          <Box onClick={() => navigateToChat(item)} sx={{ cursor: 'pointer' }}>
-            <Typography>{item}</Typography>
-          </Box>
-          <Box sx={{ display: 'flex', gap: 1 }}>
-            <Button
-              onClick={() => handleAddFromUnknownUser(item)}
-              color="success"
-              variant="outlined"
-              size="small"
-            >
-              Add
-            </Button>
-            <Button
-              onClick={() => handleDeleteUnknownSender(item)}
-              color="error"
-              variant="outlined"
-              size="small"
-            >
-              Delete
-            </Button>
-          </Box>
-        </Paper>
-      ))}
-    </Box>
-
-    {/* Groups Section */}
-    <Typography variant="h6" fontWeight="bold" mb={1}>
-      Groups
-    </Typography>
-    <Box sx={{ display: 'flex', gap: 1, mb: 2 }}>
-      <TextField
-        label="Group Name"
-        value={newGroupName}
-        onChange={(e) => setNewGroupName(e.target.value)}
-        fullWidth
-        size="small"
-        sx={{ bgcolor: '#fff', borderRadius: 1 }}
-      />
-      <Button
-        variant="contained"
-        onClick={handleCreateGroup}
-        sx={{ bgcolor: '#25D366', '&:hover': { bgcolor: '#1EBE5D' }, px: 3 }}
-      >
-        Create
-      </Button>
-    </Box>
-
-    <Box sx={{ maxHeight: 160, overflowY: 'auto' }}>
-      {Array.isArray(groups) &&
-        groups.map((group) => (
-          <Paper
-            key={group.id}
-            elevation={1}
             sx={{
-              display: 'flex',
-              justifyContent: 'space-between',
-              alignItems: 'center',
-              p: 1.5,
-              mb: 1,
-              borderRadius: 2,
-              bgcolor: '#fff',
+              '& .MuiOutlinedInput-root': {
+                backgroundColor: '#374151',
+                color: '#e5e7eb',
+                '& fieldset': { borderColor: '#4b5563' },
+                '&:hover fieldset': { borderColor: '#25d366' },
+                '&.Mui-focused fieldset': { borderColor: '#25d366' },
+              },
+              '& .MuiInputLabel-root': { color: '#9ca3af' },
+              '& .MuiInputLabel-root.Mui-focused': { color: '#25d366' },
+            }}
+          />
+          <Button
+            variant="contained"
+            onClick={() => handleAddContact()}
+            sx={{
+              backgroundColor: '#25d366',
+              '&:hover': { backgroundColor: '#1db954' },
+              px: 3,
+              minWidth: 'auto',
             }}
           >
-            <Box onClick={() => navigateToGroup(group)} sx={{ cursor: 'pointer' }}>
-              <Typography fontWeight="medium">{group.name}</Typography>
-              <Typography variant="caption" color="textSecondary">
-                Admin: {group.admin}
+            <Add />
+          </Button>
+        </Box>
+      </Box>
+
+      {/* Main Content */}
+      <Box sx={{ flex: 1, overflow: 'auto', backgroundColor: '#111b21' }}>
+        {/* Search Bar */}
+        <Box sx={{ p: 2, backgroundColor: '#1f2937', borderBottom: '1px solid #374151' }}>
+          <TextField
+            label="Search conversations"
+            value={searchText}
+            onChange={(e) => handleSearch(e.target.value)}
+            fullWidth
+            size="small"
+            sx={{
+              '& .MuiOutlinedInput-root': {
+                backgroundColor: '#374151',
+                color: '#e5e7eb',
+                '& fieldset': { borderColor: '#4b5563' },
+                '&:hover fieldset': { borderColor: '#25d366' },
+                '&.Mui-focused fieldset': { borderColor: '#25d366' },
+              },
+              '& .MuiInputLabel-root': { color: '#9ca3af' },
+              '& .MuiInputLabel-root.Mui-focused': { color: '#25d366' },
+            }}
+          />
+        </Box>
+
+        {/* Contacts Section */}
+        <Box sx={{ p: 2 }}>
+          <Typography variant="subtitle1" sx={{ color: '#25d366', mb: 2, display: 'flex', alignItems: 'center' }}>
+            <Person sx={{ mr: 1 }} />
+            Contacts ({filteredContacts.length})
+          </Typography>
+          
+          {filteredContacts.map((item) => (
+            <Box
+              key={item.contact}
+              onClick={() => navigateToChat(item)}
+              sx={{
+                display: 'flex',
+                alignItems: 'center',
+                p: 2,
+                cursor: 'pointer',
+                borderRadius: 1,
+                '&:hover': { backgroundColor: '#1f2937' },
+                mb: 1,
+              }}
+            >
+              <Avatar sx={{ bgcolor: '#25d366', mr: 2, width: 48, height: 48 }}>
+                {(item.name || item.contact).charAt(0).toUpperCase()}
+              </Avatar>
+              <Box sx={{ flex: 1 }}>
+                <Typography sx={{ color: '#e5e7eb', fontWeight: 500 }}>
+                  {item.name || item.contact}
+                </Typography>
+                <Typography variant="caption" sx={{ 
+                  color: onlineUsers.includes(item.contact) ? '#25d366' : '#9ca3af' 
+                }}>
+                  {onlineUsers.includes(item.contact) ? 'Online' : 'Last seen recently'}
+                </Typography>
+              </Box>
+              <Button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleDeleteContact(item.contact);
+                }}
+                size="small"
+                sx={{ color: '#ef4444', minWidth: 'auto' }}
+              >
+                Remove
+              </Button>
+            </Box>
+          ))}
+        </Box>
+
+        {/* Unknown Users */}
+        {unknownSenders.length > 0 && (
+          <>
+            <Divider sx={{ borderColor: '#374151', mx: 2 }} />
+            <Box sx={{ p: 2 }}>
+              <Typography variant="subtitle1" sx={{ color: '#f59e0b', mb: 2 }}>
+                Unknown Contacts ({unknownSenders.length})
               </Typography>
+              
+              {unknownSenders.map((item) => (
+                <Box
+                  key={item}
+                  onClick={() => navigateToChat(item)}
+                  sx={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    p: 2,
+                    cursor: 'pointer',
+                    borderRadius: 1,
+                    '&:hover': { backgroundColor: '#1f2937' },
+                    mb: 1,
+                  }}
+                >
+                  <Avatar sx={{ bgcolor: '#f59e0b', mr: 2, width: 48, height: 48 }}>
+                    {item.charAt(0).toUpperCase()}
+                  </Avatar>
+                  <Box sx={{ flex: 1 }}>
+                    <Typography sx={{ color: '#e5e7eb', fontWeight: 500 }}>
+                      {item}
+                    </Typography>
+                    <Typography variant="caption" sx={{ color: '#9ca3af' }}>
+                      Unknown contact
+                    </Typography>
+                  </Box>
+                  <Box sx={{ display: 'flex', gap: 1 }}>
+                    <Button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleAddFromUnknownUser(item);
+                      }}
+                      size="small"
+                      sx={{ color: '#25d366', minWidth: 'auto' }}
+                    >
+                      Add
+                    </Button>
+                    <Button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleDeleteUnknownSender(item);
+                      }}
+                      size="small"
+                      sx={{ color: '#ef4444', minWidth: 'auto' }}
+                    >
+                      Delete
+                    </Button>
+                  </Box>
+                </Box>
+              ))}
+            </Box>
+          </>
+        )}
+
+        {/* Groups Section */}
+        <Divider sx={{ borderColor: '#374151', mx: 2 }} />
+        <Box sx={{ p: 2 }}>
+          <Typography variant="subtitle1" sx={{ color: '#25d366', mb: 2, display: 'flex', alignItems: 'center' }}>
+            <Group sx={{ mr: 1 }} />
+            Groups ({groups.length})
+          </Typography>
+          
+          <Box sx={{ display: 'flex', gap: 1, mb: 2 }}>
+            <TextField
+              label="Group Name"
+              value={newGroupName}
+              onChange={(e) => setNewGroupName(e.target.value)}
+              fullWidth
+              size="small"
+              sx={{
+                '& .MuiOutlinedInput-root': {
+                  backgroundColor: '#374151',
+                  color: '#e5e7eb',
+                  '& fieldset': { borderColor: '#4b5563' },
+                  '&:hover fieldset': { borderColor: '#25d366' },
+                  '&.Mui-focused fieldset': { borderColor: '#25d366' },
+                },
+                '& .MuiInputLabel-root': { color: '#9ca3af' },
+                '& .MuiInputLabel-root.Mui-focused': { color: '#25d366' },
+              }}
+            />
+            <Button
+              variant="contained"
+              onClick={handleCreateGroup}
+              sx={{
+                backgroundColor: '#25d366',
+                '&:hover': { backgroundColor: '#1db954' },
+                px: 3,
+                minWidth: 'auto',
+              }}
+            >
+              <Add />
+            </Button>
+          </Box>
+
+          {Array.isArray(groups) &&
+            groups.map((group) => (
+              <Box
+                key={group.id}
+                onClick={() => navigateToGroup(group)}
+                sx={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  p: 2,
+                  cursor: 'pointer',
+                  borderRadius: 1,
+                  '&:hover': { backgroundColor: '#1f2937' },
+                  mb: 1,
+                }}
+              >
+                <Avatar sx={{ bgcolor: '#0ea5e9', mr: 2, width: 48, height: 48 }}>
+                  <Group />
+                </Avatar>
+                <Box sx={{ flex: 1 }}>
+                  <Typography sx={{ color: '#e5e7eb', fontWeight: 500 }}>
+                    {group.name}
+                  </Typography>
+                  <Typography variant="caption" sx={{ color: '#9ca3af' }}>
+                    Admin: {group.admin}
+                  </Typography>
+                </Box>
+              </Box>
+            ))}
+        </Box>
+      </Box>
+    </Box>
+
+    {/* Snackbar */}
+    <Snackbar
+      open={snackbarVisible}
+      onClose={() => setSnackbarVisible(false)}
+      autoHideDuration={3000}
+      message={snackbarMessage}
+      sx={{
+        '& .MuiSnackbarContent-root': {
+          backgroundColor: '#1f2937',
+          color: '#e5e7eb',
+        },
+      }}
+    />
+  </Box>
+);
+
+}
+
+export default UserListScreen;
             </Box>
           </Paper>
         ))}

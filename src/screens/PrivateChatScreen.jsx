@@ -1,10 +1,11 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { Box, Typography, IconButton, Menu, MenuItem, TextField, Dialog,
-  DialogTitle, DialogContent, DialogContentText,} from '@mui/material';
-import MoreVertIcon from '@mui/icons-material/MoreVert';
-import AttachFileIcon from '@mui/icons-material/AttachFile';
-import SendIcon from '@mui/icons-material/Send';
-import CloseIcon from '@mui/icons-material/Close';
+import {
+  Box, Typography, IconButton, Menu, MenuItem, TextField, Dialog,
+  DialogTitle, DialogContent, DialogContentText, Avatar, Paper
+} from '@mui/material';
+import {
+  MoreVert, AttachFile, Send, Close, ArrowBack, Phone, VideoCall
+} from '@mui/icons-material';
 import { useLocation } from 'react-router-dom';
 import { io } from 'socket.io-client';
 import CryptoJS from 'crypto-js';
@@ -257,21 +258,54 @@ const passedName = location.state?.name || null;
   };
 
   return (
-    <Box sx={{ height: '100vh', display: 'flex', flexDirection: 'column', background: '#e5ddd5' }}>
+    <Box sx={{ height: '100vh', display: 'flex', flexDirection: 'column', backgroundColor: '#0b141a' }}>
       {/* Header */}
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', p: 2, bgcolor: '#fff' }}>
-        <Typography variant="h6" sx={{ color: '#075e54' }}>{contactName}</Typography>
-        <div>
-          <IconButton onClick={handleMenuOpen}><MoreVertIcon /></IconButton>
+      <Box sx={{
+        display: 'flex',
+        alignItems: 'center',
+        p: 2,
+        backgroundColor: '#1f2937',
+        borderBottom: '1px solid #374151',
+      }}>
+        <IconButton sx={{ color: '#e5e7eb', mr: 1 }}>
+          <ArrowBack />
+        </IconButton>
+        <Avatar sx={{ bgcolor: '#25d366', mr: 2, width: 40, height: 40 }}>
+          {contactName.charAt(0).toUpperCase()}
+        </Avatar>
+        <Box sx={{ flex: 1 }}>
+          <Typography variant="h6" sx={{ color: '#e5e7eb', fontWeight: 500 }}>
+            {contactName}
+          </Typography>
+          <Typography variant="caption" sx={{ color: '#9ca3af' }}>
+            last seen recently
+          </Typography>
+        </Box>
+        <Box>
+          <IconButton sx={{ color: '#e5e7eb' }}>
+            <VideoCall />
+          </IconButton>
+          <IconButton sx={{ color: '#e5e7eb' }}>
+            <Phone />
+          </IconButton>
+          <IconButton onClick={handleMenuOpen} sx={{ color: '#e5e7eb' }}>
+            <MoreVert />
+          </IconButton>
           <Menu anchorEl={anchorEl} open={open} onClose={handleMenuClose}>
             <MenuItem onClick={() => setViewDialogOpen(true)}>View Contact</MenuItem>
             <MenuItem onClick={() => alert('Blocked')}>Block User</MenuItem>
           </Menu>
-        </div>
+        </Box>
       </Box>
 
       {/* View Contact Modal */}
-      <Dialog open={viewDialogOpen} onClose={() => setViewDialogOpen(false)}>
+      <Dialog
+        open={viewDialogOpen}
+        onClose={() => setViewDialogOpen(false)}
+        PaperProps={{
+          sx: { backgroundColor: '#1f2937', color: '#e5e7eb' }
+        }}
+      >
         <DialogTitle>Contact Info</DialogTitle>
         <DialogContent>
           <DialogContentText>
@@ -282,10 +316,19 @@ const passedName = location.state?.name || null;
       </Dialog>
 
       {/* Messages */}
-      <Box sx={{ flex: 1, overflowY: 'auto', p: 2 }}>
+      <Box sx={{ flex: 1, overflowY: 'auto', p: 2, backgroundColor: '#111b21' }}>
         {Object.entries(groupMessagesByDate(messages)).map(([date, msgs]) => (
           <React.Fragment key={date}>
-            <Typography sx={{ textAlign: 'center', fontSize: 12, color: '#64748b', my: 1 }}>{date}</Typography>
+            <Box sx={{ display: 'flex', justifyContent: 'center', my: 2 }}>
+              <Paper sx={{
+                backgroundColor: '#1f2937',
+                px: 2,
+                py: 0.5,
+                borderRadius: 2,
+              }}>
+                <Typography sx={{ fontSize: 12, color: '#9ca3af' }}>{date}</Typography>
+              </Paper>
+            </Box>
             {msgs.map((msg, i) => {
               const isMe = msg.from === currentUser;
               const time = new Date(msg.timestamp).toLocaleTimeString('en-IN', {
@@ -299,32 +342,51 @@ const passedName = location.state?.name || null;
                 <Box
                   key={i}
                   sx={{
-                    alignSelf: isMe ? 'flex-end' : 'flex-start',
-                    bgcolor: isMe ? '#dcf8c6' : '#fff',
-                    borderRadius: 2,
-                    p: 1.5,
+                    display: 'flex',
+                    justifyContent: isMe ? 'flex-end' : 'flex-start',
                     mb: 1,
-                    maxWidth: '70%',
-                    boxShadow: 1,
-                    ml: isMe ? 'auto' : 0,
-                    mr: isMe ? 0 : 'auto',
                   }}
                 >
-                  {msg.text && <Typography>{msg.text}</Typography>}
+                  <Box sx={{
+                    backgroundColor: isMe ? '#005c4b' : '#1f2937',
+                    borderRadius: '18px',
+                    p: 1.5,
+                    maxWidth: '70%',
+                    wordBreak: 'break-word',
+                  }}
+                  >
+                    {msg.text && (
+                      <Typography sx={{ color: '#e5e7eb', mb: 0.5 }}>
+                        {msg.text}
+                      </Typography>
+                    )}
                   {msg.attachment_url && (
                     msg.attachment_url.match(/\.(jpg|jpeg|png|gif)$/i) ? (
                       <img
                         src={msg.attachment_url}
                         alt="preview"
-                        style={{ maxWidth: '100%', borderRadius: 8, marginTop: 6 }}
+                        style={{ maxWidth: '100%', borderRadius: 12, marginTop: 6 }}
                       />
                     ) : (
-                      <a href={msg.attachment_url} target="_blank" rel="noopener noreferrer" style={{ color: '#1e40af' }}>
+                      <a
+                        href={msg.attachment_url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        style={{ color: '#25d366' }}
+                      >
                         📎 View File
                       </a>
                     )
                   )}
-                  <Typography sx={{ fontSize: 10, color: '#64748b', mt: 1, textAlign: 'right' }}>{time}</Typography>
+                    <Typography sx={{
+                      fontSize: 11,
+                      color: '#9ca3af',
+                      mt: 0.5,
+                      textAlign: 'right',
+                    }}>
+                      {time}
+                    </Typography>
+                  </Box>
                 </Box>
               );
             })}
@@ -335,12 +397,12 @@ const passedName = location.state?.name || null;
 
       {/* Attachment Preview */}
       {attachment && (
-        <Box sx={{ bgcolor: '#fff', p: 2, position: 'relative', borderTop: '1px solid #ccc' }}>
+        <Box sx={{ backgroundColor: '#1f2937', p: 2, position: 'relative', borderTop: '1px solid #374151' }}>
           <IconButton
             sx={{ position: 'absolute', top: 4, right: 4 }}
             onClick={() => setAttachment(null)}
           >
-            <CloseIcon sx={{ color: '#dc2626' }} />
+            <Close sx={{ color: '#ef4444' }} />
           </IconButton>
           {attachment.type?.startsWith('image') ? (
             <img
@@ -349,7 +411,7 @@ const passedName = location.state?.name || null;
               style={{ width: 120, height: 120, borderRadius: 12 }}
             />
           ) : (
-            <Typography sx={{ mt: 1 }}>📎 {attachment.name}</Typography>
+            <Typography sx={{ mt: 1, color: '#e5e7eb' }}>📎 {attachment.name}</Typography>
           )}
         </Box>
       )}
@@ -358,25 +420,37 @@ const passedName = location.state?.name || null;
       <Box sx={{
         display: 'flex',
         alignItems: 'center',
-        p: 1,
-        bgcolor: '#f0f0f0',
-        borderTop: '1px solid #ccc',
+        p: 2,
+        backgroundColor: '#1f2937',
+        borderTop: '1px solid #374151',
       }}>
-        <IconButton component="label">
-          <AttachFileIcon />
+        <IconButton component="label" sx={{ color: '#9ca3af' }}>
+          <AttachFile />
           <input type="file" hidden onChange={pickAttachment} />
         </IconButton>
         <TextField
           value={message}
           onChange={(e) => setMessage(e.target.value)}
-          placeholder="Message"
+          placeholder="Type a message"
           variant="outlined"
           fullWidth
           size="small"
-          sx={{ mx: 1, bgcolor: '#fff', borderRadius: 2 }}
+          sx={{
+            mx: 1,
+            '& .MuiOutlinedInput-root': {
+              backgroundColor: '#374151',
+              color: '#e5e7eb',
+              borderRadius: '20px',
+              '& fieldset': { border: 'none' },
+            },
+            '& .MuiInputBase-input::placeholder': {
+              color: '#9ca3af',
+              opacity: 1,
+            },
+          }}
         />
-        <IconButton onClick={sendMessage}>
-          <SendIcon sx={{ color: '#075e54' }} />
+        <IconButton onClick={sendMessage} sx={{ color: '#25d366' }}>
+          <Send />
         </IconButton>
       </Box>
     </Box>

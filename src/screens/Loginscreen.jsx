@@ -4,10 +4,9 @@ import {
   TextField,
   Button,
   Typography,
-  Card,
-  CardContent,
   CircularProgress,
   Link,
+  Paper,
 } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import { io } from 'socket.io-client';
@@ -53,83 +52,117 @@ const LoginScreen = () => {
     <Box
       sx={{
         minHeight: '100vh',
-        backgroundColor: '#dbeafe',
+        backgroundColor: '#0b141a',
         display: 'flex',
         justifyContent: 'center',
         alignItems: 'center',
-        position: 'relative',
         padding: 2,
       }}
     >
-      <Box
+      <Paper
         sx={{
-          position: 'absolute',
-          top: -100,
-          left: -100,
-          width: 300,
-          height: 300,
-          borderRadius: '50%',
-          backgroundColor: '#93c5fd',
-          opacity: 0.4,
-          transform: 'rotate(45deg)',
-        }}
-      />
-      <Card
-        sx={{
-          width: 410,
-          backgroundColor: 'rgba(255, 255, 255, 0.95)',
-          borderRadius: 3,
-          boxShadow: 8,
+          width: 400,
+          backgroundColor: '#1f2937',
+          borderRadius: 2,
+          p: 4,
+          boxShadow: '0 8px 32px rgba(0, 0, 0, 0.3)',
         }}
       >
-        <CardContent>
-          <Typography variant="h3" align="center" mb={1}>
-            💬
-          </Typography>
-          <Typography variant="h5" align="center" color="primary" fontWeight="bold">
-            Welcome Back
-          </Typography>
-          <Typography variant="body2" align="center" color="text.secondary" mb={3}>
-            Login to start chatting
-          </Typography>
-
-          <TextField
-            label="Phone or Email"
-            value={identifier}
-            fullWidth
-            onChange={(e) => setIdentifier(e.target.value)}
-            margin="normal"
-            variant="outlined"
-          />
-          <TextField
-            label="Password"
-            type="password"
-            value={password}
-            fullWidth
-            onChange={(e) => setPassword(e.target.value)}
-            margin="normal"
-            variant="outlined"
-          />
-
-          <Button
-            fullWidth
-            variant="contained"
-            color="primary"
-            onClick={handleLogin}
-            disabled={loading}
-            sx={{ borderRadius: 2, py: 1 }}
+        <Box sx={{ textAlign: 'center', mb: 4 }}>
+          <Box
+            sx={{
+              width: 80,
+              height: 80,
+              borderRadius: '50%',
+              backgroundColor: '#25d366',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              margin: '0 auto 16px',
+              fontSize: '2rem',
+            }}
           >
-            {loading ? <CircularProgress size={24} color="inherit" /> : 'Login'}
-          </Button>
-
-          <Typography mt={2} align="center">
-            New user?{' '}
-            <Link component="button" onClick={() => navigate('/register')}>
-              Register here
-            </Link>
+            💬
+          </Box>
+          <Typography variant="h4" sx={{ color: '#e5e7eb', fontWeight: 300, mb: 1 }}>
+            WhatsApp
           </Typography>
-        </CardContent>
-      </Card>
+          <Typography variant="body2" sx={{ color: '#9ca3af' }}>
+            Sign in to continue messaging
+          </Typography>
+        </Box>
+
+        <TextField
+          label="Phone or Email"
+          value={identifier}
+          fullWidth
+          onChange={(e) => setIdentifier(e.target.value)}
+          margin="normal"
+          variant="outlined"
+          sx={{
+            '& .MuiOutlinedInput-root': {
+              backgroundColor: '#374151',
+              color: '#e5e7eb',
+              '& fieldset': { borderColor: '#4b5563' },
+              '&:hover fieldset': { borderColor: '#25d366' },
+              '&.Mui-focused fieldset': { borderColor: '#25d366' },
+            },
+            '& .MuiInputLabel-root': { color: '#9ca3af' },
+            '& .MuiInputLabel-root.Mui-focused': { color: '#25d366' },
+          }}
+        />
+        <TextField
+          label="Password"
+          type="password"
+          value={password}
+          fullWidth
+          onChange={(e) => setPassword(e.target.value)}
+          margin="normal"
+          variant="outlined"
+          sx={{
+            '& .MuiOutlinedInput-root': {
+              backgroundColor: '#374151',
+              color: '#e5e7eb',
+              '& fieldset': { borderColor: '#4b5563' },
+              '&:hover fieldset': { borderColor: '#25d366' },
+              '&.Mui-focused fieldset': { borderColor: '#25d366' },
+            },
+            '& .MuiInputLabel-root': { color: '#9ca3af' },
+            '& .MuiInputLabel-root.Mui-focused': { color: '#25d366' },
+          }}
+        />
+
+        <Button
+          fullWidth
+          variant="contained"
+          onClick={handleLogin}
+          disabled={loading}
+          sx={{
+            mt: 3,
+            mb: 2,
+            py: 1.5,
+            backgroundColor: '#25d366',
+            borderRadius: 2,
+            fontSize: '1rem',
+            fontWeight: 500,
+            '&:hover': { backgroundColor: '#1db954' },
+            '&:disabled': { backgroundColor: '#4b5563' },
+          }}
+        >
+          {loading ? <CircularProgress size={24} color="inherit" /> : 'Sign In'}
+        </Button>
+
+        <Typography sx={{ textAlign: 'center', color: '#9ca3af' }}>
+          New to WhatsApp?{' '}
+          <Link
+            component="button"
+            onClick={() => navigate('/register')}
+            sx={{ color: '#25d366', textDecoration: 'none', '&:hover': { textDecoration: 'underline' } }}
+          >
+            Create Account
+          </Link>
+        </Typography>
+      </Paper>
     </Box>
   );
 };
