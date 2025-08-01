@@ -266,7 +266,6 @@ const passedName = location.state?.name || null;
           <Menu anchorEl={anchorEl} open={open} onClose={handleMenuClose}>
             <MenuItem onClick={() => setViewDialogOpen(true)}>View Contact</MenuItem>
             <MenuItem onClick={() => alert('Blocked')}>Block User</MenuItem>
-            <MenuItem onClick={() => setMessages([])}>Clear Chat</MenuItem>
           </Menu>
         </div>
       </Box>
